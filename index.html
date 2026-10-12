@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ahmad's Academy</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A6%8A%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css" id="login-css">
+</head>
+<body>
+  <main class="page" id="signin" hidden>
+    <section class="hero" aria-hidden="true">
+      <div class="hero-inner">
+        <svg class="fox" viewBox="0 0 120 120"><path d="M18 16 48 44 16 64Z" fill="#ff9600"/><path d="M102 16 72 44 104 64Z" fill="#ff9600"/><path d="M26 28 42 44 26 54Z" fill="#ffc7a0"/><path d="M94 28 78 44 94 54Z" fill="#ffc7a0"/><ellipse cx="60" cy="68" rx="45" ry="38" fill="#ff9600"/><path d="M60 106C30 106 20 82 19 77c19-7 33 6 41 19 8-13 22-26 41-19-1 5-11 29-41 29Z" fill="#fff"/><circle cx="43" cy="62" r="6.5" fill="#3c3c3c"/><circle cx="77" cy="62" r="6.5" fill="#3c3c3c"/><circle cx="45" cy="60" r="2.2" fill="#fff"/><circle cx="79" cy="60" r="2.2" fill="#fff"/><ellipse cx="60" cy="89" rx="6.5" ry="4.8" fill="#3c3c3c"/></svg>
+        <h2>Learn a little every day.</h2>
+        <p>Mathematics and English for Class 11, in short lessons that adapt to you.</p>
+        <ul>
+          <li><span>📐</span>12 Maths skills, from equations to calculus</li>
+          <li><span>📖</span>11 English skills, from tenses to listening</li>
+          <li><span>🔥</span>Streaks, quests and hints to keep you going</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="panel">
+      <form class="card" id="form" novalidate>
+        <div class="brand"><span class="logo">🦊</span>Ahmad's Academy</div>
+        <h1>Welcome back</h1>
+        <p class="sub">Sign in to continue your lessons.</p>
+
+        <div class="alert" id="alert" role="alert" hidden></div>
+
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
+
+        <label for="password">Password</label>
+        <div class="pwrap">
+          <input id="password" name="password" type="password" autocomplete="current-password" required>
+          <button type="button" class="toggle" id="toggle" aria-label="Show password" aria-pressed="false">Show</button>
+        </div>
+
+        <button type="submit" class="submit" id="submit">SIGN IN</button>
+        <p class="foot">🔒 Private learning space. You stay signed in for 10 minutes.</p>
+      </form>
+    </section>
+  </main>
+  <script src="shell.js"></script>
+</body>
+</html>
