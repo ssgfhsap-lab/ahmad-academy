@@ -5,6 +5,11 @@
 // file cannot be opened. Nothing in this file or in the bundle contains the password itself.
 (() => {
   'use strict';
+  // Use the look chosen inside the app (light or dark, and the theme colour) on the sign-in page too.
+  try {
+    const look = JSON.parse(localStorage.getItem('aa-theme') || 'null'), root = document.documentElement;
+    if (look) { root.dataset.theme = look.dark ? 'dark' : 'light'; root.style.setProperty('--green', look.pri); root.style.setProperty('--green-d', look.priD); root.style.setProperty('--pri-ink', look.ink); }
+  } catch (e) { /* stays light */ }
   const SESSION_KEY = 'aa-session', SESSION_MS = 10 * 60 * 1000;
   const $ = id => document.getElementById(id);
   const form = $('form'), user = $('username'), pass = $('password'), alertBox = $('alert'), submit = $('submit'), toggle = $('toggle');
@@ -60,6 +65,7 @@
   function boot(files, exp, keys) {
     $('signin').remove();
     $('login-css').remove();
+    ['--green', '--green-d'].forEach(v => document.documentElement.style.removeProperty(v));   // the app sets its own colours
     document.head.appendChild(document.createElement('style')).textContent = files.css;
     const app = document.body.appendChild(document.createElement('div'));
     app.id = 'app';
