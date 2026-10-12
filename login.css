@@ -56,3 +56,15 @@ input:focus { border-color: var(--blue); background: #fff; box-shadow: 0 0 0 4px
   .brand { margin-bottom: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* The sign-in page follows the theme chosen inside the app (saved on this device). */
+.hero { background: linear-gradient(155deg, var(--green), var(--green-d)); }
+.hero h2, .hero p, .hero li { color: var(--pri-ink, #fff); }
+.submit { color: var(--pri-ink, #fff); }
+html[data-theme="dark"] { --ink: #eef4f7; --mute: #9db0ba; --line: #33434c; --soft: #212e35; }
+html[data-theme="dark"] body { background: #111b20; }
+html[data-theme="dark"] label { color: #cdd9df; }
+html[data-theme="dark"] input:focus { background: #1a252b; }
+html[data-theme="dark"] .alert { background: #472223; color: #ff9a9a; }
+html[data-theme="dark"] .toggle:hover, html[data-theme="dark"] .toggle:focus-visible { background: #22323b; }
+html[data-theme="dark"] .submit:disabled { background: #212e35; color: #6a7c86; }
