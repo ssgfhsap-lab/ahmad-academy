@@ -19,27 +19,51 @@
     const base = await crypto.subtle.importKey('raw', enc.encode(username.trim().toLowerCase() + '\n' + password), 'PBKDF2', false, ['deriveBits']);
     return new Uint8Array(await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: b64(b.salt), iterations: b.iter }, base, 512));
   }
-  // Returns the app's files, or null when the keys are wrong.
-  async function open(keys, b) {
-    const iv = b64(b.iv), data = b64(b.data), signed = new Uint8Array(iv.length + data.length);
+  // Checks the signature, then decrypts. Returns the bytes, or null when the keys are wrong.
+  async function unseal(keys, iv, mac, data) {
+    const signed = new Uint8Array(iv.length + data.length);
     signed.set(iv); signed.set(data, iv.length);
     const macKey = await crypto.subtle.importKey('raw', keys.slice(32), { name: 'HMAC', hash: 'SHA-256' }, false, ['verify']);
-    if (!await crypto.subtle.verify('HMAC', macKey, b64(b.mac), signed)) return null;
+    if (!await crypto.subtle.verify('HMAC', macKey, mac, signed)) return null;
     const aesKey = await crypto.subtle.importKey('raw', keys.slice(0, 32), { name: 'AES-CBC' }, false, ['decrypt']);
-    return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, aesKey, data)));
+    return new Uint8Array(await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, aesKey, data));
+  }
+  // Returns the app's files, or null when the keys are wrong.
+  async function open(keys, b) {
+    const plain = await unseal(keys, b64(b.iv), b64(b.mac), b64(b.data));
+    return plain && JSON.parse(new TextDecoder().decode(plain));
+  }
+  // The recorded voice clips: voice.bin = iv (16 bytes) + signature (32) + encrypted pack. Inside the pack:
+  // a 4-byte header length, a JSON list of [text, clip size], then the MP3s one after another.
+  // Returns a Map of text -> playable URL; empty if there are no recordings.
+  async function loadVoice(keys) {
+    const clips = new Map();
+    try {
+      const r = await fetch('voice.bin', { cache: 'no-cache' });
+      if (!r.ok) return clips;
+      const buf = new Uint8Array(await r.arrayBuffer()), plain = await unseal(keys, buf.slice(0, 16), buf.slice(16, 48), buf.slice(48));
+      if (!plain) return clips;
+      const headLen = new DataView(plain.buffer, plain.byteOffset).getUint32(0, true);
+      let at = 4 + headLen;
+      JSON.parse(new TextDecoder().decode(plain.subarray(4, at))).forEach(([text, size]) => {
+        clips.set(text, URL.createObjectURL(new Blob([plain.subarray(at, at + size)], { type: 'audio/mpeg' })));
+        at += size;
+      });
+    } catch (e) { /* no recordings: the app falls back to the device voice */ }
+    return clips;
   }
 
   function signOut() {
     try { localStorage.removeItem(SESSION_KEY); } catch (e) { /* storage unavailable */ }
     location.reload();
   }
-  function boot(files, exp) {
+  function boot(files, exp, keys) {
     $('signin').remove();
     $('login-css').remove();
     document.head.appendChild(document.createElement('style')).textContent = files.css;
     const app = document.body.appendChild(document.createElement('div'));
     app.id = 'app';
-    window.ACADEMY = { exp, signOut };
+    window.ACADEMY = { exp, signOut, voice: loadVoice(keys) };   // clips download in the background
     [files.content, files.app].forEach(code => { document.body.appendChild(document.createElement('script')).textContent = code; });
   }
 
@@ -72,7 +96,7 @@
       if (files) {
         const exp = Date.now() + SESSION_MS;
         try { localStorage.setItem(SESSION_KEY, JSON.stringify({ exp, keys: toB64(keys), v: b.mac })); } catch (err) { /* storage unavailable */ }
-        return boot(files, exp);
+        return boot(files, exp, keys);
       }
       pass.value = '';
       fail('Incorrect username or password.');
@@ -88,8 +112,8 @@
     try {
       const s = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
       if (s && s.exp > Date.now()) {
-        const b = await getBundle(), files = s.v === b.mac ? await open(b64(s.keys), b) : null;
-        if (files) return boot(files, s.exp);
+        const b = await getBundle(), keys = b64(s.keys), files = s.v === b.mac ? await open(keys, b) : null;
+        if (files) return boot(files, s.exp, keys);
       }
       localStorage.removeItem(SESSION_KEY);
     } catch (e) { /* fall through to the form */ }
