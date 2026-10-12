@@ -63,7 +63,7 @@
     document.head.appendChild(document.createElement('style')).textContent = files.css;
     const app = document.body.appendChild(document.createElement('div'));
     app.id = 'app';
-    window.ACADEMY = { exp, signOut, voice: loadVoice(keys) };   // clips download in the background
+    window.ACADEMY = { exp, signOut, voice: loadVoice(keys), agent: files.agent || null };   // clips download in the background
     [files.content, files.app].forEach(code => { document.body.appendChild(document.createElement('script')).textContent = code; });
   }
 
